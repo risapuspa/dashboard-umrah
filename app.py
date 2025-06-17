@@ -167,13 +167,11 @@ if sidebar_option == "Input Data Calon Jemaah Umrah":
         except Exception as e:
             st.error(f"Terjadi kesalahan saat memproses prediksi: {e}")
 
+# ========== Visualisasi Histori ==========
 elif sidebar_option == "Visualisasi Histori":
-    st.markdown("<h2 class='main-title'>Visualisasi Histori Prediksi Paket Umrah</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; font-weight: bold;'>Visualisasi Grafik Berdasarkan Data Histori</h2>", unsafe_allow_html=True)
 
-    try:
-        df = pd.read_csv("data_hasil.csv")  # ✅ WAJIB agar df terdefinisi
-
-   # Custom Legend mapping
+    # Custom Legend mapping
     legend_labels = {
         0: "Paket Plus A",
         1: "Paket Plus B",
@@ -301,3 +299,5 @@ elif sidebar_option == "Visualisasi Histori":
         plt.grid(axis='y', linestyle='--', alpha=0.6)
         plt.tight_layout()
         st.pyplot(fig)
+
+
