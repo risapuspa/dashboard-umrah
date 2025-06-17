@@ -167,85 +167,281 @@ if sidebar_option == "Input Data Calon Jemaah Umrah":
         except Exception as e:
             st.error(f"Terjadi kesalahan saat memproses prediksi: {e}")
 
+# ========== Visualisasi Histori ==========
 elif sidebar_option == "Visualisasi Histori":
-    st.markdown("<h2 class='main-title'>Visualisasi Histori Prediksi Paket Umrah</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; font-weight: bold;'>Visualisasi Grafik Berdasarkan Data Histori</h2>", unsafe_allow_html=True)
 
-    try:
-        df = pd.read_csv("data_hasil.csv")
+    # Custom Legend mapping
+    legend_labels = {
+        0: "Paket Plus A",
+        1: "Paket Plus B",
+        2: "Paket Reguler 4 Bintang",
+        3: "Paket Reguler 3 Bintang",
+        4: "Paket Plus C",
+        5: "Paket Reguler 5 Bintang"
+    }
 
-        # Legend untuk paket
-        legend_labels = {
-            0: "Paket Plus A",
-            1: "Paket Plus B",
-            2: "Paket Reguler 4 Bintang",
-            3: "Paket Reguler 3 Bintang",
-            4: "Paket Plus C",
-            5: "Paket Reguler 5 Bintang"
-        }
+    # ===== Distribusi Paket Umrah =====
+    with st.expander("Distribusi Paket Umrah"):
+        plt.figure(figsize=(8, 6))
+        sns.countplot(data=df, x='paket_umrah', palette='tab20b')
 
-        with st.expander("📦 Distribusi Paket Umrah"):
-            plt.figure(figsize=(8, 5))
-            sns.countplot(data=df, x='paket_umrah', palette='Set2')
-            plt.title("Distribusi Paket Umrah")
-            plt.xticks(ticks=range(6), labels=[legend_labels[i] for i in range(6)], rotation=25)
-            plt.xlabel("Jenis Paket")
-            plt.ylabel("Jumlah")
-            st.pyplot(plt)
+        plt.title('Distribusi Paket Umrah Desember 2022 - Desember 2023', fontsize=10)
+        plt.xlabel('Jenis Paket Umrah', fontsize=9)
+        plt.ylabel('Jumlah', fontsize=9)
+        plt.xticks(ticks=range(6), labels=[legend_labels[i] for i in range(6)], rotation=25)
+        plt.tight_layout()
+        st.pyplot(plt)
 
-        with st.expander("🗓️ Bulan-Tahun Keberangkatan"):
-            plt.figure(figsize=(8, 4))
-            bulan_labels = [
-                "Des 2022", "Jan 2023", "Feb 2023", "Mar 2023", "Apr 2023", "Mei 2023",
-                "Jun 2023", "Jul 2023", "Agu 2023", "Sep 2023", "Okt 2023", "Nov 2023", "Des 2023"
-            ]
-            sns.countplot(data=df, x='bulan_tahun', color='lightblue')
-            plt.xticks(ticks=range(13), labels=bulan_labels, rotation=25)
-            plt.xlabel("Bulan-Tahun")
-            plt.ylabel("Jumlah")
-            plt.title("Jumlah Pemesanan per Bulan")
-            st.pyplot(plt)
+    # ===== Bulan-Tahun Pemesanan =====
+    with st.expander("Bulan-Tahun Pemesanan"):
+   
+        # Label sumbu X (0-12 jadi bulan)
+        bulan_labels = [
+            "Des 2022", "Jan 2023", "Feb 2023", "Mar 2023", "Apr 2023", "Mei 2023",
+            "Jun 2023", "Jul 2023", "Agu 2023", "Sep 2023", "Okt 2023", "Nov 2023", "Des 2023"
+        ]
 
-        with st.expander("📊 Pemesanan per Bulan (Stacked Bar)"):
-            df['tanggal_keberangkatan'] = pd.to_datetime(df['tanggal_keberangkatan'])
-            df['bulan'] = df['tanggal_keberangkatan'].dt.to_period('M')
-            pivot = df.groupby(['bulan', 'paket_umrah'])['tanggal_keberangkatan'].count().unstack().fillna(0)
+        plt.figure(figsize=(6, 4))
+        ax = sns.countplot(data=df, x='bulan_tahun', color='skyblue')
+        ax.set_xticks(range(13))
+        ax.set_xticklabels(bulan_labels, rotation=25)
 
-            bulan_order = pd.period_range(start="2022-12", end="2023-12", freq="M")
-            pivot = pivot.reindex(bulan_order.astype(str), fill_value=0)
+        plt.title('Bulan-Tahun Pemesanan (Desember 2022 - Desember 2023)', fontsize=10)
+        plt.xlabel('Bulan-Tahun Pemesanan', fontsize=9)
+        plt.ylabel('Jumlah', fontsize=9)
+        plt.tight_layout()
+        st.pyplot(plt)
 
-            fig, ax = plt.subplots(figsize=(10, 5))
-            pivot.plot(kind='bar', stacked=True, ax=ax, colormap='Set3')
-            ax.set_title("Pemesanan Paket per Bulan")
-            ax.set_xlabel("Bulan")
-            ax.set_ylabel("Jumlah")
-            ax.legend(title="Paket", labels=[legend_labels[i] for i in range(6)], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=3)
-            st.pyplot(fig)
+    # ===== Pemesanan Paket per Bulan =====
+    with st.expander("Pemesanan Paket Umrah per Bulan"):
 
-        with st.expander("👤 Berdasarkan Kelompok Usia"):
-            bins = [0, 18, 27, 37, 47, 57, 67, 77]
-            labels = ["<18", "18-27", "28-37", "38-47", "48-57", "58-67", "68-77"]
-            df['kelompok_usia'] = pd.cut(df['usia'], bins=bins, labels=labels, right=False)
-            pivot = df.groupby(['kelompok_usia', 'paket_umrah']).size().unstack().fillna(0)
+        df['tanggal_keberangkatan'] = pd.to_datetime(df['tanggal_keberangkatan'])
+        df['bulan'] = df['tanggal_keberangkatan'].dt.to_period('M')
 
-            fig, ax = plt.subplots(figsize=(8, 5))
-            pivot.plot(kind='bar', stacked=True, ax=ax, colormap='Set2')
-            ax.set_title("Paket Umrah Berdasarkan Usia")
-            ax.set_xlabel("Kelompok Usia")
-            ax.set_ylabel("Jumlah")
-            ax.legend(title="Paket", labels=[legend_labels[i] for i in range(6)], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=3)
-            st.pyplot(fig)
+        pivot_data = df.groupby(['bulan', 'paket_umrah'])['tanggal_keberangkatan'].count().unstack().fillna(0)
+        bulan_order = pd.period_range(start="2022-12", end="2023-12", freq="M")
+        pivot_data = pivot_data.reindex(bulan_order.astype(str), fill_value=0)
 
-        with st.expander("🚻 Berdasarkan Jenis Kelamin"):
-            pivot_gender = df.groupby(['paket_umrah', 'jenis_kelamin']).size().unstack().fillna(0)
-            fig, ax = plt.subplots(figsize=(8, 5))
-            pivot_gender.plot(kind='bar', ax=ax, colormap='Pastel1')
-            ax.set_title("Paket Umrah Berdasarkan Jenis Kelamin")
-            ax.set_xlabel("Paket")
-            ax.set_ylabel("Jumlah")
-            ax.set_xticks(ticks=range(6))
-            ax.set_xticklabels([legend_labels[i] for i in range(6)], rotation=25)
-            ax.legend(title="Jenis Kelamin", labels=["Pria", "Wanita"])
-            st.pyplot(fig)
+        formal_colors = ['#5d7290', '#d9a066', '#a3b18a', '#c97c7c', '#f1e0c5', '#9a8f97']
+        fig, ax = plt.subplots(figsize=(8, 6))
+        pivot_data.plot(kind='bar', stacked=True, color=formal_colors, ax=ax)
 
-    except Exception as e:
-        st.error(f"Gagal menampilkan visualisasi: {e}")
+        for container in ax.containers:
+            for rect in container:
+                height = rect.get_height()
+                if height > 0:
+                    text_color = 'white' if rect.get_facecolor()[:3] < (0.3, 0.3, 0.3) else 'black'
+                    ax.text(
+                        rect.get_x() + rect.get_width()/2,
+                        rect.get_y() + height - (height * 0.4),
+                        int(height),
+                        ha='center', va='center', fontsize=8, color=text_color, fontweight='bold'
+                    )
+
+        plt.title('Pemesanan Paket Umrah per Bulan', fontsize=14)
+        plt.xlabel('Bulan Pemesanan', fontsize=12)
+        plt.ylabel('Jumlah Pemesanan', fontsize=12)
+        plt.xticks(rotation=45, ha='right')
+        ax.legend(title='Paket Umrah', labels=[legend_labels[i] for i in range(6)], loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=3)
+        st.pyplot(fig)
+
+    # ===== Pemesanan Berdasarkan Usia =====
+    with st.expander("Pemilihan Paket Berdasarkan Kelompok Usia"):
+       
+        bins = [0, 18, 27, 37, 47, 57, 67, 77]
+        labels = ["<18", "18-27", "28-37", "38-47", "48-57", "58-67", "68-77"]
+        df['kelompok_usia'] = pd.cut(df['usia'], bins=bins, labels=labels, right=False)
+
+        pivot_data = df.groupby(['kelompok_usia', 'paket_umrah']).size().unstack().fillna(0)
+
+        formal_colors = ['#4e79a7','#f28e2b', '#76b7b2', '#e15759', '#a0cbe8',  '#ffbe7d']
+        fig, ax = plt.subplots(figsize=(8, 6))
+        pivot_data.plot(kind='bar', stacked=True, color=formal_colors, ax=ax, alpha=0.85)
+
+        for container in ax.containers:
+            for rect in container:
+                height = rect.get_height()
+                if height > 0:
+                    text_color = 'white' if rect.get_facecolor()[:3] < (0.3, 0.3, 0.3) else 'black'
+                    ax.text(
+                        rect.get_x() + rect.get_width()/2,
+                        rect.get_y() + height - (height * 0.4),
+                        int(height),
+                        ha='center', va='center', fontsize=7, color=text_color, fontweight='bold'
+                    )
+
+        plt.title("Pemilihan Paket Berdasarkan Kelompok Usia", fontsize=12)
+        plt.xlabel("Kelompok Usia", fontsize=10)
+        plt.ylabel("Jumlah Pemesanan", fontsize=10)
+        plt.xticks(rotation=0)
+        ax.legend(title='Paket Umrah', labels=[legend_labels[i] for i in range(6)], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=3)
+        st.pyplot(fig)
+
+    # ===== Pemesanan Berdasarkan Jenis Kelamin =====
+    with st.expander("Pemesanan Paket Berdasarkan Jenis Kelamin"):
+     
+        pivot_gender = df.groupby(['paket_umrah', 'jenis_kelamin']).size().unstack().fillna(0)
+
+        gender_colors = ['#4e79a7', '#f3a7db']
+        fig, ax = plt.subplots(figsize=(8, 6))
+        pivot_gender.plot(kind='bar', color=gender_colors, ax=ax)
+
+        plt.title("Pemesanan Paket Umrah Berdasarkan Jenis Kelamin", fontsize=12)
+        plt.xlabel("Jenis Paket Umrah", fontsize=10)
+        plt.ylabel("Jumlah Pemesanan", fontsize=10)
+        plt.xticks(ticks=range(6), labels=[legend_labels[i] for i in range(6)], rotation=25)
+        plt.legend(title="Jenis Kelamin", labels=["Pria", "Wanita"], bbox_to_anchor=(1, 1), loc='upper left')
+
+        for container in ax.containers:
+            ax.bar_label(container, fmt='%d', label_type='edge', fontsize=9, color='black', fontweight='bold')
+
+        plt.grid(axis='y', linestyle='--', alpha=0.6)
+        plt.tight_layout()
+        st.pyplot(fig)
+
+# ========== Visualisasi Histori ==========
+elif sidebar_option == "Visualisasi Histori":
+    st.markdown("<h2 style='text-align: center; font-weight: bold;'>Visualisasi Grafik Berdasarkan Data Histori</h2>", unsafe_allow_html=True)
+
+    # Custom Legend mapping
+    legend_labels = {
+        0: "Paket Plus A",
+        1: "Paket Plus B",
+        2: "Paket Reguler 4 Bintang",
+        3: "Paket Reguler 3 Bintang",
+        4: "Paket Plus C",
+        5: "Paket Reguler 5 Bintang"
+    }
+
+    # ===== Distribusi Paket Umrah =====
+    with st.expander("Distribusi Paket Umrah"):
+        plt.figure(figsize=(8, 6))
+        sns.countplot(data=df, x='paket_umrah', palette='tab20b')
+
+        plt.title('Distribusi Paket Umrah Desember 2022 - Desember 2023', fontsize=10)
+        plt.xlabel('Jenis Paket Umrah', fontsize=9)
+        plt.ylabel('Jumlah', fontsize=9)
+        plt.xticks(ticks=range(6), labels=[legend_labels[i] for i in range(6)], rotation=25)
+        plt.tight_layout()
+        st.pyplot(plt)
+
+    # ===== Bulan-Tahun Pemesanan =====
+    with st.expander("Bulan-Tahun Pemesanan"):
+   
+        # Label sumbu X (0-12 jadi bulan)
+        bulan_labels = [
+            "Des 2022", "Jan 2023", "Feb 2023", "Mar 2023", "Apr 2023", "Mei 2023",
+            "Jun 2023", "Jul 2023", "Agu 2023", "Sep 2023", "Okt 2023", "Nov 2023", "Des 2023"
+        ]
+
+        plt.figure(figsize=(6, 4))
+        ax = sns.countplot(data=df, x='bulan_tahun', color='skyblue')
+        ax.set_xticks(range(13))
+        ax.set_xticklabels(bulan_labels, rotation=25)
+
+        plt.title('Bulan-Tahun Pemesanan (Desember 2022 - Desember 2023)', fontsize=10)
+        plt.xlabel('Bulan-Tahun Pemesanan', fontsize=9)
+        plt.ylabel('Jumlah', fontsize=9)
+        plt.tight_layout()
+        st.pyplot(plt)
+
+    # ===== Pemesanan Paket per Bulan =====
+    with st.expander("Pemesanan Paket Umrah per Bulan"):
+
+        df['tanggal_keberangkatan'] = pd.to_datetime(df['tanggal_keberangkatan'])
+        df['bulan'] = df['tanggal_keberangkatan'].dt.to_period('M')
+
+        pivot_data = df.groupby(['bulan', 'paket_umrah'])['tanggal_keberangkatan'].count().unstack().fillna(0)
+        bulan_order = pd.period_range(start="2022-12", end="2023-12", freq="M")
+        pivot_data = pivot_data.reindex(bulan_order.astype(str), fill_value=0)
+
+        formal_colors = ['#5d7290', '#d9a066', '#a3b18a', '#c97c7c', '#f1e0c5', '#9a8f97']
+        fig, ax = plt.subplots(figsize=(8, 6))
+        pivot_data.plot(kind='bar', stacked=True, color=formal_colors, ax=ax)
+
+        for container in ax.containers:
+            for rect in container:
+                height = rect.get_height()
+                if height > 0:
+                    text_color = 'white' if rect.get_facecolor()[:3] < (0.3, 0.3, 0.3) else 'black'
+                    ax.text(
+                        rect.get_x() + rect.get_width()/2,
+                        rect.get_y() + height - (height * 0.4),
+                        int(height),
+                        ha='center', va='center', fontsize=8, color=text_color, fontweight='bold'
+                    )
+
+        plt.title('Pemesanan Paket Umrah per Bulan', fontsize=14)
+        plt.xlabel('Bulan Pemesanan', fontsize=12)
+        plt.ylabel('Jumlah Pemesanan', fontsize=12)
+        plt.xticks(rotation=45, ha='right')
+        ax.legend(title='Paket Umrah', labels=[legend_labels[i] for i in range(6)], loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=3)
+        st.pyplot(fig)
+
+    # ===== Pemesanan Berdasarkan Usia =====
+    with st.expander("Pemilihan Paket Berdasarkan Kelompok Usia"):
+       
+        bins = [0, 18, 27, 37, 47, 57, 67, 77]
+        labels = ["<18", "18-27", "28-37", "38-47", "48-57", "58-67", "68-77"]
+        df['kelompok_usia'] = pd.cut(df['usia'], bins=bins, labels=labels, right=False)
+
+        pivot_data = df.groupby(['kelompok_usia', 'paket_umrah']).size().unstack().fillna(0)
+
+        formal_colors = ['#4e79a7','#f28e2b', '#76b7b2', '#e15759', '#a0cbe8',  '#ffbe7d']
+        fig, ax = plt.subplots(figsize=(8, 6))
+        pivot_data.plot(kind='bar', stacked=True, color=formal_colors, ax=ax, alpha=0.85)
+
+        for container in ax.containers:
+            for rect in container:
+                height = rect.get_height()
+                if height > 0:
+                    text_color = 'white' if rect.get_facecolor()[:3] < (0.3, 0.3, 0.3) else 'black'
+                    ax.text(
+                        rect.get_x() + rect.get_width()/2,
+                        rect.get_y() + height - (height * 0.4),
+                        int(height),
+                        ha='center', va='center', fontsize=7, color=text_color, fontweight='bold'
+                    )
+
+        plt.title("Pemilihan Paket Berdasarkan Kelompok Usia", fontsize=12)
+        plt.xlabel("Kelompok Usia", fontsize=10)
+        plt.ylabel("Jumlah Pemesanan", fontsize=10)
+        plt.xticks(rotation=0)
+        ax.legend(title='Paket Umrah', labels=[legend_labels[i] for i in range(6)], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=3)
+        st.pyplot(fig)
+
+    # ===== Pemesanan Berdasarkan Jenis Kelamin =====
+    with st.expander("Pemesanan Paket Berdasarkan Jenis Kelamin"):
+     
+        pivot_gender = df.groupby(['paket_umrah', 'jenis_kelamin']).size().unstack().fillna(0)
+
+        gender_colors = ['#4e79a7', '#f3a7db']
+        fig, ax = plt.subplots(figsize=(8, 6))
+        pivot_gender.plot(kind='bar', color=gender_colors, ax=ax)
+
+        plt.title("Pemesanan Paket Umrah Berdasarkan Jenis Kelamin", fontsize=12)
+        plt.xlabel("Jenis Paket Umrah", fontsize=10)
+        plt.ylabel("Jumlah Pemesanan", fontsize=10)
+        plt.xticks(ticks=range(6), labels=[legend_labels[i] for i in range(6)], rotation=25)
+        plt.legend(title="Jenis Kelamin", labels=["Pria", "Wanita"], bbox_to_anchor=(1, 1), loc='upper left')
+
+        for container in ax.containers:
+            ax.bar_label(container, fmt='%d', label_type='edge', fontsize=9, color='black', fontweight='bold')
+
+        plt.grid(axis='y', linestyle='--', alpha=0.6)
+        plt.tight_layout()
+        st.pyplot(fig)
+
+
+
+
+
+
+
+
+
+
+
+
+
