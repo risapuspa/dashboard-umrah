@@ -168,7 +168,7 @@ if sidebar_option == "Input Data Calon Jemaah Umrah":
 
     # ========== Prediksi ==========
     if submit:
-        jk_encoded = 0 if jenis_kelamin == "Laki-laki" else 1
+        jk_encoded = 0 if jenis_kelamin == "Pria" else 1
         wilayah_mapping = {name: i for i, name in enumerate(wilayah_options)}
         wilayah_encoded = wilayah_mapping[wilayah_geografis]
 
