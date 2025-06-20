@@ -36,8 +36,9 @@ harga_paket = {
 st.set_page_config(
     layout="wide",
     page_title="Prediksi Umrah",
-    page_icon="🕋"
+    page_icon=":bar_chart:"
 )
+
 # ========== Styling ==========
 st.markdown("""
     <style>
