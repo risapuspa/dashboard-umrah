@@ -41,11 +41,13 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    .block-container > div:first-child {
-        display: none !important;
+    h1:contains("keyboard_double_arrow_right"),
+    p:contains("keyboard_double_arrow_right") {
+        display: none;
     }
     </style>
 """, unsafe_allow_html=True)
+
 
 # ========== Styling ==========
 st.markdown("""
