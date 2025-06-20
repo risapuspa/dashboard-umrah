@@ -39,6 +39,14 @@ st.set_page_config(
     page_icon="🕋"
 )
 
+st.markdown("""
+    <style>
+    .block-container > div:first-child {
+        display: none !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # ========== Styling ==========
 st.markdown("""
     <style>
