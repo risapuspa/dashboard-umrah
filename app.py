@@ -1,4 +1,11 @@
 import streamlit as st
+# ========== Page Setup ==========
+st.set_page_config(
+    layout="wide",
+    page_title="Prediksi Umrah",
+    page_icon="🕋"
+)
+
 import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
@@ -31,14 +38,6 @@ harga_paket = {
     "paket_plus_a": "Rp43.450.000",
     "paket_plus_c": "Rp67.400.000"
 }
-
-# ========== Page Setup ==========
-st.set_page_config(
-    layout="wide",
-    page_title="Prediksi Umrah",
-    page_icon=":bar_chart:"
-)
-
 # ========== Styling ==========
 st.markdown("""
     <style>
