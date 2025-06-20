@@ -38,16 +38,6 @@ st.set_page_config(
     page_title="Prediksi Umrah",
     page_icon="🕋"
 )
-
-# Menghindari teks error jika Streamlit inject teks aneh
-st.markdown("""
-    <style>
-    h1, p {
-        visibility: visible;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 # ========== Styling ==========
 st.markdown("""
     <style>
