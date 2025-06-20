@@ -14,21 +14,7 @@ import os
 
 # Membaca data dari CSV
 df = pd.read_csv('data_hasil.csv')  # Gantilah dengan path ke file kamu
-
-# === FORCED LIGHT THEME CONFIG ===
-if not os.path.exists(".streamlit"):
-    os.makedirs(".streamlit")
-with open(".streamlit/config.toml", "w") as f:
-    f.write("""
-[theme]
-base="light"
-primaryColor="#1E90FF"
-backgroundColor="#FFFFFF"
-secondaryBackgroundColor="#F5F5F5"
-textColor="#000000"
-font="sans serif"
-""")
-    
+ 
 # Mapping harga paket
 harga_paket = {
     "paket_reguler_5_bintang": "Rp41.450.000",
