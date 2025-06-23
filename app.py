@@ -108,9 +108,14 @@ fit_columns = joblib.load('fit_columns.joblib')
 
 # ========== Sidebar for Method Selection ==========
 st.sidebar.markdown("<h2 style='font-weight: bold;'>MENU</h2>", unsafe_allow_html=True)
+st.sidebar.markdown("Silakan pilih menu di bawah ini:")
+
 sidebar_option = st.sidebar.radio(
-    "Pilih Menu",
-    ("Input Data Calon Jemaah Umrah", "Visualisasi Histori")
+    label="",
+    options=(
+        "Input Data Calon Jemaah Umrah",
+        "Visualisasi Histori"
+    )
 )
 
 # ========== Form Input Manual ==========
