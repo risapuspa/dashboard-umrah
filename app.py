@@ -107,7 +107,8 @@ label_encoder = joblib.load('label_encoder_umrah.joblib')
 fit_columns = joblib.load('fit_columns.joblib')
 
 # ========== Sidebar for Method Selection ==========
-st.sidebar_option = st.sidebar.radio(
+st.sidebar.markdown("<h2 style='font-weight: bold;'>MENU</h2>", unsafe_allow_html=True)
+sidebar_option = st.sidebar.radio(
     "Pilih Menu",
     ("Input Data Calon Jemaah Umrah", "Visualisasi Histori")
 )
