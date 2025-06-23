@@ -107,21 +107,15 @@ label_encoder = joblib.load('label_encoder_umrah.joblib')
 fit_columns = joblib.load('fit_columns.joblib')
 
 # ========== Sidebar for Method Selection ==========
-st.sidebar.markdown("<h2 style='font-weight: bold;'>➡️ MENU</h2>", unsafe_allow_html=True)
+    st.sidebar.markdown("<h2 style='font-weight: bold;'>➡️ MENU</h2>", unsafe_allow_html=True)
 
-sidebar_option = st.sidebar.radio(
-    "Silakan pilih menu di bawah ini:",
-    (
-        "Input Data Calon Jemaah Umrah",
-        "Visualisasi Histori"
+    sidebar_option = st.sidebar.radio(
+        "Silakan pilih menu di bawah ini:",
+        (
+            "📥 Input Data Calon Jemaah Umrah",
+            "📊 Visualisasi Histori"
+        )
     )
-    # Hapus sisa elemen/ikon aneh
-st.sidebar.empty()
-
-)
-
-
-
 # ========== Form Input Manual ==========
 if sidebar_option == "Input Data Calon Jemaah Umrah":
     st.markdown("<h2 class='main-title'>REKOMENDASI PAKET UMRAH</h2>", unsafe_allow_html=True)
