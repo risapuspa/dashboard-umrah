@@ -13,8 +13,15 @@ import seaborn as sns
 import os
 
 # Membaca data dari CSV
-df = pd.read_csv('data_hasil.csv')  # Gantilah dengan path ke file kamu
- 
+df = pd.read_csv('DatasetUmrah.csv')  
+
+# Bersihkan nama kolom
+df.columns = df.columns.str.strip().str.lower()
+
+# Standarkan isi kolom kategorikal
+df['paket_umrah'] = df['paket_umrah'].str.strip().str.title()
+df['jenis_kelamin'] = df['jenis_kelamin'].str.strip().str.title()
+
 # Mapping harga paket
 harga_paket = {
     "paket_reguler_5_bintang": "Rp41.450.000",
@@ -123,16 +130,13 @@ if sidebar_option == "Input Data Calon Jemaah Umrah":
 
         with form_col1:
             jenis_kelamin = st.selectbox("Jenis Kelamin", ["Pria", "Wanita"])
-            usia = st.number_input("Usia", min_value=18, max_value=100, value=30)
+            usia = st.number_input("usia", min_value=18, max_value=100, value=30)
             wilayah_options = [
-                "Jawa", "Sumatera", "Sulawesi", "Kalimantan",
-                "Maluku", "Bali & Nusa Tenggara", "Papua"
+                "Jawa", "Sumatera", "Sulawesi", "Kalimantan", "Nusa Tenggara"
             ]
             wilayah_geografis = st.selectbox("Wilayah Geografis", wilayah_options)
 
         with form_col2:
-            tahun = st.selectbox("Tahun Keberangkatan", [2022, 2023])
-
             bulan_nama = [
                 "Januari", "Februari", "Maret", "April", "Mei", "Juni",
                 "Juli", "Agustus", "September", "Oktober", "November", "Desember"
@@ -140,12 +144,10 @@ if sidebar_option == "Input Data Calon Jemaah Umrah":
             bulan_str = st.selectbox("Bulan Keberangkatan", bulan_nama)
             bulan_angka = bulan_nama.index(bulan_str) + 1
 
-            if tahun == 2022 and bulan_angka == 12:
+            if bulan_angka == 12:
                 bulan = 0
-            elif tahun == 2023:
-                bulan = bulan_angka
             else:
-                bulan = None
+                bulan = bulan_angka
 
             tanggal = st.number_input("Tanggal Keberangkatan", min_value=1, max_value=31, value=15, step=1)
 
@@ -162,7 +164,6 @@ if sidebar_option == "Input Data Calon Jemaah Umrah":
             'jenis_kelamin': [jk_encoded],
             'usia': [usia],
             'wilayah_geografis': [wilayah_encoded],
-            'tahun': [tahun],
             'bulan': [bulan],
             'tanggal': [tanggal]
         })
@@ -240,31 +241,40 @@ elif sidebar_option == "Visualisasi Histori":
 
     # ===== Distribusi Paket Umrah =====
     with st.expander("Distribusi Paket Umrah"):
+        df['paket_umrah_label'] = df['paket_umrah'].map(legend_labels)  
         plt.figure(figsize=(8, 6))
         sns.countplot(data=df, x='paket_umrah', palette='tab20b')
 
-        plt.title('Distribusi Paket Umrah Desember 2022 - Desember 2023', fontsize=10)
+        plt.title('Distribusi Paket Umrah Desember 2022 - Februari 2024', fontsize=10)
         plt.xlabel('Jenis Paket Umrah', fontsize=9)
         plt.ylabel('Jumlah', fontsize=9)
-        plt.xticks(ticks=range(6), labels=[legend_labels[i] for i in range(6)], rotation=25)
+        plt.xticks(rotation=25)
         plt.tight_layout()
         st.pyplot(plt)
+
 
     # ===== Bulan-Tahun Pemesanan =====
     with st.expander("Bulan-Tahun Pemesanan"):
    
+        df['tanggal_keberangkatan'] = pd.to_datetime(df['tanggal_keberangkatan'], errors='coerce')
+
+        df = df[df['tanggal_keberangkatan'] >= '2022-12-01']
+       
+        df['bulan_tahun'] = df['tanggal_keberangkatan'].dt.to_period('M').astype(str)
+
         # Label sumbu X (0-12 jadi bulan)
         bulan_labels = [
-            "Des 2022", "Jan 2023", "Feb 2023", "Mar 2023", "Apr 2023", "Mei 2023",
-            "Jun 2023", "Jul 2023", "Agu 2023", "Sep 2023", "Okt 2023", "Nov 2023", "Des 2023"
-        ]
+        "Des 2022", "Jan 2023", "Feb 2023", "Mar 2023", "Apr 2023", "Mei 2023",
+        "Jun 2023", "Jul 2023", "Agu 2023", "Sep 2023", "Okt 2023", "Nov 2023", "Des 2023",
+        "Jan 2024", "Feb 2024", "Mar 2024", "Apr 2024", "Mei 2024", "Jun 2024",
+        "Jul 2024", "Agu 2024", "Sep 2024", "Okt 2024", "Nov 2024", "Des 2024"
+    ]
+        unique_bulan = df['bulan_tahun'].sort_values().unique()
+        plt.figure(figsize=(8, 6))
+        ax = sns.countplot(data=df, x='bulan_tahun', order=unique_bulan, color='skyblue')
+        ax.set_xticklabels(unique_bulan, rotation=25)
 
-        plt.figure(figsize=(6, 4))
-        ax = sns.countplot(data=df, x='bulan_tahun', color='skyblue')
-        ax.set_xticks(range(13))
-        ax.set_xticklabels(bulan_labels, rotation=25)
-
-        plt.title('Bulan-Tahun Pemesanan (Desember 2022 - Desember 2023)', fontsize=10)
+        plt.title('Bulan-Tahun Pemesanan (Desember 2022 - Februari 2024)', fontsize=10)
         plt.xlabel('Bulan-Tahun Pemesanan', fontsize=9)
         plt.ylabel('Jumlah', fontsize=9)
         plt.tight_layout()
@@ -273,12 +283,15 @@ elif sidebar_option == "Visualisasi Histori":
     # ===== Pemesanan Paket per Bulan =====
     with st.expander("Pemesanan Paket Umrah per Bulan"):
 
-        df['tanggal_pemesanan'] = pd.to_datetime(df['tanggal_pemesanan'])
-        df['bulan'] = df['tanggal_pemesanan'].dt.to_period('M')
+        df['tanggal_keberangkatan'] = pd.to_datetime(df['tanggal_keberangkatan'])
+        df['bulan'] = df['tanggal_keberangkatan'].dt.to_period('M')
 
-        pivot_data = df.groupby(['bulan', 'paket_umrah'])['tanggal_pemesanan'].count().unstack().fillna(0)
-        bulan_order = pd.period_range(start="2022-12", end="2023-12", freq="M")
+        pivot_data = df.groupby(['bulan', 'paket_umrah'])['tanggal_keberangkatan'].count().unstack().fillna(0)
+
+            # Atur urutan bulan dari Desember 2022 sampai Februari 2024
+        bulan_order = pd.period_range(start="2022-12", end="2024-02", freq="M")
         pivot_data = pivot_data.reindex(bulan_order.astype(str), fill_value=0)
+
 
         formal_colors = ['#5d7290', '#d9a066', '#a3b18a', '#c97c7c', '#f1e0c5', '#9a8f97']
         fig, ax = plt.subplots(figsize=(8, 6))
@@ -304,7 +317,7 @@ elif sidebar_option == "Visualisasi Histori":
         st.pyplot(fig)
 
     # ===== Pemesanan Berdasarkan Usia =====
-    with st.expander("Pemilihan Paket Berdasarkan Kelompok Usia"):
+    with st.expander("Pemilihan Paket Berdasarkan Kelompok usia"):
        
         bins = [0, 18, 27, 37, 47, 57, 67, 77]
         labels = ["<18", "18-27", "28-37", "38-47", "48-57", "58-67", "68-77"]
@@ -328,8 +341,8 @@ elif sidebar_option == "Visualisasi Histori":
                         ha='center', va='center', fontsize=7, color=text_color, fontweight='bold'
                     )
 
-        plt.title("Pemilihan Paket Berdasarkan Kelompok Usia", fontsize=12)
-        plt.xlabel("Kelompok Usia", fontsize=10)
+        plt.title("Pemilihan Paket Berdasarkan Kelompok usia", fontsize=12)
+        plt.xlabel("Kelompok usia", fontsize=10)
         plt.ylabel("Jumlah Pemesanan", fontsize=10)
         plt.xticks(rotation=0)
         ax.legend(title='Paket Umrah', labels=[legend_labels[i] for i in range(6)], loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=3)
