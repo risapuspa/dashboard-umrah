@@ -107,17 +107,21 @@ label_encoder = joblib.load('label_encoder_umrah.joblib')
 fit_columns = joblib.load('fit_columns.joblib')
 
 # ========== Sidebar for Method Selection ==========
+# ========== Sidebar for Method Selection ==========
 st.sidebar.markdown("<h2 style='font-weight: bold;'>➡️ MENU</h2>", unsafe_allow_html=True)
+st.sidebar.markdown("Silakan pilih menu di bawah ini:")
 
 sidebar_option = st.sidebar.radio(
-        "Silakan pilih menu di bawah ini:",
-        (
-            "📥 Input Data Calon Jemaah Umrah",
-            "📊 Visualisasi Histori"
-        )
+    "",
+    (
+        "📥 Input Data Calon Jemaah Umrah",
+        "📊 Visualisasi Histori"
+    )
 )
+
+
 # ========== Form Input Manual ==========
-if sidebar_option == "Input Data Calon Jemaah Umrah":
+if sidebar_option == "📥 Input Data Calon Jemaah Umrah":
     st.markdown("<h2 class='main-title'>REKOMENDASI PAKET UMRAH</h2>", unsafe_allow_html=True)
     st.markdown("<p class='sub-title'>Sistem ini dirancang untuk membantu memilih paket terbaik berdasarkan preferensi dan profil jamaah. Isi data calon jamaah untuk mendapatkan rekomendasi paket umrah yang sesuai kebutuhan.</p>", unsafe_allow_html=True)
     st.markdown("""
@@ -229,7 +233,7 @@ if sidebar_option == "Input Data Calon Jemaah Umrah":
             st.pyplot(fig)
 
 # ========== Visualisasi Histori ==========
-elif sidebar_option == "Visualisasi Histori":
+elif sidebar_option == "📊 Visualisasi Histori":
     st.markdown("<h2 style='text-align: center; font-weight: bold;'>Visualisasi Grafik Berdasarkan Data Histori</h2>", unsafe_allow_html=True)
 
     # Custom Legend mapping
